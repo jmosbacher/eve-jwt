@@ -26,7 +26,7 @@ setup(
     name='eve_jwt',
     version='0.1.0',
     description='Top-level package for eve-jwt.',
-    python_requires='>3.7',
+    python_requires='==3.*,>=3.7.0',
     project_urls={"homepage": "https://github.com/jmosbacher/eve_jwt"},
     author='Yossi Mosbacher',
     author_email='joe.mosbacher@gmail.com',
@@ -35,6 +35,6 @@ setup(
     packages=['eve_jwt'],
     package_dir={"": "."},
     package_data={},
-    install_requires=['authlib==0.*,>=0.15.2', 'eve==1.*,>=1.1.4', 'flask==1.*,>=1.1.2'],
+    install_requires=['authlib==0.*,>=0.15.2', 'cachetools==4.*,>=4.1.1', 'eve==1.*,>=1.1.4', 'flask==1.*,>=1.1.2', 'requests==2.*,>=2.25.0'],
     extras_require={"dev": ["bumpversion", "coverage", "flake8", "invoke", "isort", "nbsphinx", "pylint", "pytest", "sphinx", "sphinx-material", "tox", "yapf"]},
 )

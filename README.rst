@@ -23,11 +23,10 @@ Usage
 
 .. code-block:: python
 
-        from eve_jwt import AsymmetricKeyValidator, JWTAuth
+        from eve_jwt import JWTAuth
         from eve import Eve
 
-        validator = AsymmetricKeyValidator(key_url="https://YOUR-OAUTH-SERVER/certs/")
-        auth = JWTAuth(validator=validator)
+        auth = JWTAuth(key_url="https://YOUR-OAUTH-SERVER/certs/")
 
         app = Eve(auth=auth)
 

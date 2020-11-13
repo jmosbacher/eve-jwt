@@ -21,10 +21,12 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">3.7"
+python = ">=3.7"
 Authlib = "^0.15.2"
 eve = "^1.1.4"
 flask = "^1.1.2"
+cachetools = "^4.1.1"
+requests = "^2.25.0"
 
 [tool.poetry.dev-dependencies]
 bumpversion = "*"

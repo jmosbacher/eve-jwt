@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from eve.auth import BasicAuth
+from eve.auth import BasicAuth, TokenAuth
 from eve.utils import config
 from flask import request, Response, g
 from flask import abort
 from functools import wraps
-from .validation import Validator
+from .validation import AsymmetricKeyValidator
 from authlib.jose import jwk
 
 AUTH_CLAIMS = 'authen_claims'
@@ -13,26 +13,26 @@ AUTH_ROLES = 'authen_roles'
 AUTH_VALUE = 'auth_value'
 
 
-class JWTAuth(BasicAuth):
+class JWTAuth(TokenAuth):
     """
     Implements JWT token validation support.
     """
 
-    def __init__(self, token_validator=None, issuer=None):
-        self.token_validator = token_validator
+    def __init__(self, key_url=None, default_key=None ,issuer=None):
+        self.validator = AsymmetricKeyValidator(key_url=key_url, default_key=default_key)
         self.issuer = issuer
 
     @property
-    def token_validator(self):
-        if self._token_validator is None:
+    def validator(self):
+        if self._validator is None:
             default_key = config.JWT_DEFAULT_KEY
-            self._token_validator = Validator(default_key, config.JWT_KEY_URL, config.JWT_TTL,
+            self._validator = Validator(default_key, config.JWT_KEY_URL, config.JWT_TTL,
                                         config.JWT_SCOPE_CLAIM, config.JWT_ROLES_CLAIM)
-        return self._token_validator
+        return self._validator
 
-    @token_validator.setter
-    def token_validator(self, value):
-        self._token_validator = value
+    @validator.setter
+    def validator(self, value):
+        self._validator = value
 
     @property
     def issuer(self):
@@ -134,7 +134,7 @@ class JWTAuth(BasicAuth):
         return requires_token_wrapper
 
     def _perform_validation(self, token, audiences, allowed_roles):
-        validated, payload, account_id, roles = self.token_validator.validate_token(
+        validated, payload, account_id, roles = self.validator.validate_token(
                 token, self.issuer, request.method, audiences, allowed_roles)
         if not validated:
             return False
