@@ -11,22 +11,23 @@ from authlib.jose import jwk
 AUTH_CLAIMS = 'authen_claims'
 AUTH_ROLES = 'authen_roles'
 AUTH_VALUE = 'auth_value'
-
+from expiringdict import ExpiringDict
+cache = ExpiringDict(max_len=100, max_age_seconds=10)
 
 class JWTAuth(TokenAuth):
     """
     Implements JWT token validation support.
     """
 
-    def __init__(self, key_url=None, default_key=None ,issuer=None):
-        self.validator = AsymmetricKeyValidator(key_url=key_url, default_key=default_key)
+    def __init__(self, validator=None ,issuer=None):
+        self.validator = validator #AsymmetricKeyValidator(key_url=key_url, default_key=default_key)
         self.issuer = issuer
 
     @property
     def validator(self):
         if self._validator is None:
             default_key = config.JWT_DEFAULT_KEY
-            self._validator = Validator(default_key, config.JWT_KEY_URL, config.JWT_TTL,
+            self._validator = AsymmetricKeyValidator(default_key, config.JWT_KEY_URL, config.JWT_TTL,
                                         config.JWT_SCOPE_CLAIM, config.JWT_ROLES_CLAIM)
         return self._validator
 

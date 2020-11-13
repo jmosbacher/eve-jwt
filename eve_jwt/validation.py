@@ -1,6 +1,8 @@
 from cachetools import TTLCache
 import requests
 from authlib.jose import jwt, jwk, util, errors
+from expiringdict import ExpiringDict
+
 
 
 class ValidatorBase:
@@ -11,9 +13,9 @@ class ValidatorBase:
 
 class AsymmetricKeyValidator(ValidatorBase):
     def __init__(self, default_key=None, key_url=None,
-                 ttl=600, scope_claim=None, roles_claim=None):
+                 ttl=3600, scope_claim=None, roles_claim=None):
         self.key_url = key_url
-        self.cache = TTLCache(100, ttl)
+        self.cache = ExpiringDict(max_len=100, max_age_seconds=ttl) #TTLCache(100, ttl)
         self.cache["default"] = default_key
         self.roles_claim = roles_claim
         self.scope_claim = scope_claim
