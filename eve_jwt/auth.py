@@ -27,8 +27,11 @@ class JWTAuth(TokenAuth):
     def validator(self):
         if self._validator is None:
             default_key = config.JWT_DEFAULT_KEY
-            self._validator = AsymmetricKeyValidator(default_key, config.JWT_KEY_URL, config.JWT_TTL,
-                                        config.JWT_SCOPE_CLAIM, config.JWT_ROLES_CLAIM)
+            ttl = config.JWT_TTL
+            if ttl is None:
+                ttl = 3600
+            self._validator = AsymmetricKeyValidator(default_key=default_key, key_url=config.JWT_KEY_URL, ttl=ttl,
+                                        scope_claim=config.JWT_SCOPE_CLAIM, roles_claim=config.JWT_ROLES_CLAIM)
         return self._validator
 
     @validator.setter
