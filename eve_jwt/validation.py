@@ -1,4 +1,4 @@
-from cachetools import TTLCache
+# from cachetools import TTLCache
 import requests
 from authlib.jose import jwt, jwk, util, errors
 from expiringdict import ExpiringDict
@@ -46,6 +46,7 @@ class AsymmetricKeyValidator(ValidatorBase):
         
         payload = dict(claims)
         account_id = payload.get('sub')  # Get account id
+
         roles = None
 
         # Check scope is configured and add append it to the roles
