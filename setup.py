@@ -24,7 +24,7 @@ if os.path.exists(readme_path):
 setup(
     long_description=readme,
     name='eve_jwt',
-    version='0.1.2',
+    version='0.1.6',
     description='Top-level package for eve-jwt.',
     python_requires='>=3.6',
     project_urls={"homepage": "https://github.com/jmosbacher/eve_jwt"},
