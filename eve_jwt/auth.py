@@ -26,12 +26,12 @@ class JWTAuth(TokenAuth):
     @property
     def validator(self):
         if self._validator is None:
-            default_key = config.JWT_DEFAULT_KEY
-            ttl = config.JWT_TTL
-            if ttl is None:
-                ttl = 3600
-            self._validator = AsymmetricKeyValidator(default_key=default_key, key_url=config.JWT_KEY_URL, ttl=ttl,
-                                        scope_claim=config.JWT_SCOPE_CLAIM, roles_claim=config.JWT_ROLES_CLAIM)
+            ttl = config.get("JWT_TTL", 3600)
+
+            scope_claim = config.get("JWT_SCOPE_CLAIM", None)
+            roles_claim = config.get("JWT_ROLES_CLAIM", None)
+            self._validator = AsymmetricKeyValidator(key_url=config.JWT_KEY_URL, ttl=ttl,
+                                        scope_claim=scope_claim, roles_claim=roles_claim)
         return self._validator
 
     @validator.setter
@@ -41,7 +41,7 @@ class JWTAuth(TokenAuth):
     @property
     def issuer(self):
         if self._issuer is None:
-            return config.JWT_ISSUER
+            return config.get("JWT_ISSUER", "")
         return self._issuer
 
     @issuer.setter
@@ -108,7 +108,8 @@ class JWTAuth(TokenAuth):
         If the validation succeed, the claims are stored and accessible thru the
         get_authen_claims() method.
         """
-        resource_conf = config.DOMAIN.get(resource, {})
+        domain = config.get("DOMAIN", {})
+        resource_conf = domain.get(resource, {})
         audiences = resource_conf.get('audiences', config.JWT_AUDIENCES)
         return self._perform_validation(token, audiences, allowed_roles)
 

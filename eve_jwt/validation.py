@@ -4,9 +4,7 @@ from authlib.jose import jwt, jwk, util, errors
 from expiringdict import ExpiringDict
 
 
-
 class ValidatorBase:
-
     def validate_token(self, token, issuer, method=None, audiences=None, allowed_roles=None):
         raise NotImplementedError
 
@@ -16,7 +14,6 @@ class AsymmetricKeyValidator(ValidatorBase):
                  ttl=3600, scope_claim=None, roles_claim=None):
         self.key_url = key_url
         self.cache = ExpiringDict(max_len=100, max_age_seconds=ttl) #TTLCache(100, ttl)
-        self.cache["default"] = default_key
         self.roles_claim = roles_claim
         self.scope_claim = scope_claim
 
@@ -27,16 +24,17 @@ class AsymmetricKeyValidator(ValidatorBase):
         if isinstance(key, dict):
             key = jwk.loads(key)
         options = {}
+        
         if audiences:
             if isinstance(audiences, str):
-                options["aud"] = {"essential": True, "value":audiences}
+                options["aud"] = {"essential": True, "value": audiences}
             else:
-                options["aud"] = {"essential": True, "values":audiences}
+                options["aud"] = {"essential": True, "values": audiences}
         else:
-            options["aud"] = {"essential": False, "values":[]}
+            options["aud"] = {"essential": False, "values": []}
             
         if issuer:
-            options["iss"] = {"essential": True, "value":issuer}
+            options["iss"] = {"essential": True, "value": issuer}
 
         try:
             claims = jwt.decode(token, key, claims_options=options)
@@ -52,10 +50,7 @@ class AsymmetricKeyValidator(ValidatorBase):
         # Check scope is configured and add append it to the roles
         if self.scope_claim and payload.get(self.scope_claim):
             scope = payload.get(self.scope_claim)
-            # Viewers can only read
-            if scope == 'viewer' and method not in ['GET', 'HEAD']:
-                return (False, payload, account_id, None)
-            roles = ['scope:%s' % scope]
+            roles = scope.split(" ")
 
         # If roles claim is defined, gather roles from the token
         if self.roles_claim:
@@ -71,10 +66,10 @@ class AsymmetricKeyValidator(ValidatorBase):
     def get_key(self, token):
         try:
             kid = util.extract_header(token.encode().partition(b".")[0], 
-                                        errors.DecodeError).get("kid","default")
+                                        errors.DecodeError).get("kid", "")
         except Exception as e:
             print(e)
-            return ""
+            kid = ""
 
         if kid not in self.cache:
             self.fetch_keys()
