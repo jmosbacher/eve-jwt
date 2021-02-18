@@ -5,7 +5,8 @@ from expiringdict import ExpiringDict
 
 
 class ValidatorBase:
-    def validate_token(self, token, issuer, method=None, audiences=None, allowed_roles=None):
+    def validate_token(self, token, issuer, method=None, 
+                        audiences=None, allowed_roles=None):
         raise NotImplementedError
 
 
@@ -24,7 +25,7 @@ class AsymmetricKeyValidator(ValidatorBase):
         if isinstance(key, dict):
             key = jwk.loads(key)
         options = {}
-        
+
         if audiences:
             if isinstance(audiences, str):
                 options["aud"] = {"essential": True, "value": audiences}
