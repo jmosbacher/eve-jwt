@@ -6,13 +6,11 @@ from flask import request, Response, g
 from flask import abort
 from functools import wraps
 from .validation import AsymmetricKeyValidator
-from authlib.jose import jwk
+
 
 AUTH_CLAIMS = 'authen_claims'
 AUTH_ROLES = 'authen_roles'
 AUTH_VALUE = 'auth_value'
-from expiringdict import ExpiringDict
-cache = ExpiringDict(max_len=100, max_age_seconds=10)
 
 
 class JWTAuth(TokenAuth):
@@ -27,11 +25,9 @@ class JWTAuth(TokenAuth):
     @property
     def validator(self):
         if self._validator is None:
-            ttl = config.JWT_TTL or 3600
-
             scope_claim = config.JWT_SCOPE_CLAIM
             roles_claim = config.JWT_ROLES_CLAIM
-            self._validator = AsymmetricKeyValidator(key_url=config.JWT_KEY_URL, ttl=ttl,
+            self._validator = AsymmetricKeyValidator(key_url=config.JWT_KEY_URL,
                                         scope_claim=scope_claim, roles_claim=roles_claim)
         return self._validator
 

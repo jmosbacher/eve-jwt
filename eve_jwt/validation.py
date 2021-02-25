@@ -1,8 +1,6 @@
-# from cachetools import TTLCache
 import requests
-from authlib.jose import jwt, jwk, util, errors
-from expiringdict import ExpiringDict
-
+from authlib.jose import jwt, jwk, util, errors, JsonWebKey
+import authlib
 
 class ValidatorBase:
     def validate_token(self, token, issuer, method=None, 
@@ -12,18 +10,18 @@ class ValidatorBase:
 
 class AsymmetricKeyValidator(ValidatorBase):
     def __init__(self, default_key=None, key_url=None,
-                 ttl=3600, scope_claim=None, roles_claim=None):
+                 scope_claim=None, roles_claim=None):
         self.key_url = key_url
-        self.cache = ExpiringDict(max_len=100, max_age_seconds=ttl) #TTLCache(100, ttl)
         self.roles_claim = roles_claim
         self.scope_claim = scope_claim
+        self._keyset = {}
+
 
     def validate_token(self, token, issuer, method=None, audiences=None, allowed_roles=None):
         key = self.get_key(token)
         if not key:
             return (False, None, None, None)
-        if isinstance(key, dict):
-            key = jwk.loads(key)
+
         options = {}
 
         if audiences:
@@ -66,15 +64,17 @@ class AsymmetricKeyValidator(ValidatorBase):
 
     def get_key(self, token):
         try:
-            kid = util.extract_header(token.encode().partition(b".")[0], 
-                                        errors.DecodeError).get("kid", "")
+            header_str = authlib.common.encoding.urlsafe_b64decode(token.split(".")[0].encode()).decode('utf-8')
+            header = authlib.common.encoding.json_loads(header_str)
+            kid = header["kid"]
         except Exception as e:
             print(e)
             kid = ""
 
-        if kid not in self.cache:
+        if kid not in self._keyset.keys:
             self.fetch_keys()
-        return self.cache.get(kid, "")
+        return self._keyset.find_by_kid(kid)
+
 
     def fetch_keys(self):
         if not self.key_url:
@@ -82,12 +82,4 @@ class AsymmetricKeyValidator(ValidatorBase):
         response = requests.get(self.key_url)
         if response.ok:
             data = response.json()
-            if "keys" in data:
-                keys = {d["kid"]: d for d in data["keys"]}
-            elif isinstance(data, list):
-                keys = {d["kid"]: d for d in data}
-            elif isinstance(data, dict) and len(data)>1:
-                keys = data
-            elif isinstance(data, dict):
-                keys = {"default": data}
-            self.cache.update(keys)
+            self._keyset = JsonWebKey.import_key_set(data)
