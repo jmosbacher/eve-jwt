@@ -1,6 +1,9 @@
 import requests
-from authlib.jose import jwt, jwk, util, errors, JsonWebKey
+from authlib.jose import jwt, jwk, util, errors, JsonWebKey, KeySet
 import authlib
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ValidatorBase:
     def validate_token(self, token, issuer, method=None, 
@@ -14,7 +17,7 @@ class AsymmetricKeyValidator(ValidatorBase):
         self.key_url = key_url
         self.roles_claim = roles_claim
         self.scope_claim = scope_claim
-        self._keyset = {}
+        self._keyset = KeySet([])
 
 
     def validate_token(self, token, issuer, method=None, audiences=None, allowed_roles=None):
@@ -63,17 +66,21 @@ class AsymmetricKeyValidator(ValidatorBase):
         return (True, payload, account_id, roles)
 
     def get_key(self, token):
+        kid = ""
         try:
             header_str = authlib.common.encoding.urlsafe_b64decode(token.split(".")[0].encode()).decode('utf-8')
             header = authlib.common.encoding.json_loads(header_str)
             kid = header["kid"]
+            return self._keyset.find_by_kid(kid)
         except Exception as e:
-            print(e)
+            logger.debug(str(e))
             kid = ""
-
-        if kid not in self._keyset.keys:
+        try:
             self.fetch_keys()
-        return self._keyset.find_by_kid(kid)
+            return self._keyset.find_by_kid(kid)
+        except Exception as e:
+            logger.debug(str(e))
+            return False
 
 
     def fetch_keys(self):
