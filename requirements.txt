@@ -1,0 +1,16 @@
+authlib==0.*,>=0.15.2
+bumpversion
+coverage
+eve==1.*,>=1.1.4
+flake8
+flask==1.*,>=1.1.2
+invoke
+isort
+nbsphinx
+pylint
+pytest
+requests==2.*,>=2.25.0
+sphinx
+sphinx-material
+tox
+yapf
