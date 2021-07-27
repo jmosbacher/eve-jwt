@@ -82,7 +82,6 @@ class AsymmetricKeyValidator(ValidatorBase):
             logger.debug(str(e))
             return False
 
-
     def fetch_keys(self):
         if not self.key_url:
             return
