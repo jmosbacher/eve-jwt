@@ -35,6 +35,6 @@ setup(
     packages=['eve_jwt'],
     package_dir={"": "."},
     package_data={},
-    install_requires=['authlib==0.14.3', 'eve==1.*,>=1.1.4', 'expiringdict==1.*,>=1.2.1', 'flask==1.*,>=1.1.2', 'requests==2.*,>=2.25.0'],
+    install_requires=['authlib==0.15.4', 'eve==1.*,>=1.1.4', 'expiringdict==1.*,>=1.2.1', 'flask==1.*,>=1.1.2', 'requests==2.*,>=2.25.0'],
     extras_require={"dev": ["bumpversion", "coverage", "flake8", "invoke", "isort", "nbsphinx", "pylint", "pytest", "sphinx", "sphinx-material", "tox", "yapf"]},
 )
